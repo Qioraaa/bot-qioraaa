@@ -18,7 +18,7 @@ const token = '9172990010:AAG1fgI_sras7A-R2fILadmX_OKI9kxENRk';
 const bot = new TelegramBot(token, { polling: true });
 
 // Masukkan username grup Telegram kamu di sini (contoh: '@namagrupkamu')
-const REQUIRED_GROUP = '@nama_grup_kamu';
+const REQUIRED_GROUP = '@qioraaa_community';
 
 // Fungsi generate ID Akses Unik
 function generateAccessID() {
