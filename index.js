@@ -36,9 +36,9 @@ const upload = multer({
 // Database ID Akses Valid
 const validAccessIds = new Set(['QIORAAA-OWNER']);
 
-// Token Bot & Konfigurasi Telegram Owner
+// Token Bot & Konfigurasi Telegram (Polling dimatikan sementara agar web server lancar)
 const token = '9172990010:AAG1fgI_sras7A-R2fILadmX_OKI9kxENRk';
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, { polling: false });
 
 const REQUIRED_GROUP = '@qioraaa_community';
 const ADMIN_TELEGRAM_ID = 7101495433;
@@ -47,47 +47,6 @@ const ADMIN_CUSTOM_ID = 'QIORAAA-OWNER';
 function generateAccessID() {
   return 'QIORAAA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
-
-// --- LOGIKA BOT TELEGRAM ---
-bot.onText(/\/start/, async (msg) => {
-  const chatId = msg.chat.id;
-  const userId = msg.from.id;
-
-  try {
-    const member = await bot.getChatMember(REQUIRED_GROUP, userId);
-    const validStatuses = ['creator', 'administrator', 'member'];
-
-    if (validStatuses.includes(member.status)) {
-      let accessId;
-      let badge = '';
-
-      if (userId === ADMIN_TELEGRAM_ID) {
-        accessId = ADMIN_CUSTOM_ID;
-        badge = ' 👑 *(Owner Access)*';
-      } else {
-        accessId = generateAccessID();
-      }
-
-      validAccessIds.add(accessId);
-
-      bot.sendMessage(
-        chatId,
-        `✅ **Akses Diterima!**${badge}\n\nTerima kasih sudah bergabung di grup.\n🔑 **ID Akses Anda:** \`${accessId}\` \n\nGunakan ID ini untuk akses Website Upload!`,
-        { parse_mode: 'Markdown' }
-      );
-    } else {
-      bot.sendMessage(
-        chatId,
-        `⚠️ **Akses Ditolak!**\n\nKamu harus bergabung ke grup ${REQUIRED_GROUP} terlebih dahulu untuk mendapatkan ID Akses.`
-      );
-    }
-  } catch (error) {
-    bot.sendMessage(
-      chatId,
-      `⚠️ **Akses Ditolak!**\n\nSilakan bergabung ke grup ${REQUIRED_GROUP} terlebih dahulu untuk menggunakan bot ini.`
-    );
-  }
-});
 
 // --- WEBSITE UPLOAD (UI + VIDEO PLAYER) ---
 app.get('/', (req, res) => {
