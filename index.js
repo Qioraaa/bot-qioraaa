@@ -16,7 +16,7 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// 2. Akses Publik Folder Uploads (Video Player direct stream)
+// 2. Akses Publik Folder Uploads (Direct Stream Video Player)
 app.use('/uploads', express.static(uploadDir));
 
 // 3. Konfigurasi Multer (Kualitas Asli 100% Tanpa Kompresi)
@@ -30,13 +30,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 * 1024 } // Max 2GB
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 } // Limit 2GB
 });
 
-// Database ID Akses
+// Database ID Akses Valid
 const validAccessIds = new Set(['QIORAAA-OWNER']);
 
-// Token Bot & Konfigurasi Telegram
+// Token Bot & Konfigurasi Telegram Owner
 const token = '9172990010:AAG1fgI_sras7A-R2fILadmX_OKI9kxENRk';
 const bot = new TelegramBot(token, { polling: true });
 
@@ -97,7 +97,7 @@ app.get('/', (req, res) => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Qioraaa Original Media Upload</title>
+      <title>Qioraaa Original Quality Upload</title>
       <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0d0e12; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
@@ -133,4 +133,43 @@ app.get('/', (req, res) => {
           const previewArea = document.getElementById('previewArea');
           
           statusDiv.style.color = '#e0e0e0';
-          statusDiv.innerText
+          statusDiv.innerText = 'Mengunggah file tanpa kompresi... Mohon tunggu.';
+          previewArea.innerHTML = '';
+
+          const formData = new FormData();
+          formData.append('accessId', document.getElementById('accessId').value.trim());
+          formData.append('file', document.getElementById('fileInput').files[0]);
+
+          try {
+            const res = await fetch('/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            
+            if (res.ok) {
+              statusDiv.style.color = '#4CAF50';
+              statusDiv.innerHTML = data.message;
+
+              if (data.fileUrl && data.fileType.startsWith('video/')) {
+                previewArea.innerHTML = \`
+                  <video controls playsinline preload="metadata">
+                    <source src="\${data.fileUrl}" type="\${data.fileType}">
+                    Browser Anda tidak mendukung pemutaran video ini.
+                  </video>
+                \`;
+              }
+            } else {
+              statusDiv.style.color = '#F44336';
+              statusDiv.innerText = data.error;
+            }
+          } catch (err) {
+            statusDiv.style.color = '#F44336';
+            statusDiv.innerText = 'Gagal terhubung ke server.';
+          }
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+// --- API ENDPOINT UPLOAD ---
+app
