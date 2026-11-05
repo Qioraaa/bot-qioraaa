@@ -172,4 +172,29 @@ app.get('/', (req, res) => {
 });
 
 // --- API ENDPOINT UPLOAD ---
-app
+app.post('/upload', upload.single('file'), (req, res) => {
+  const { accessId } = req.body;
+
+  if (!accessId || !validAccessIds.has(accessId)) {
+    if (req.file) fs.unlinkSync(req.file.path);
+    return res.status(403).json({ error: '❌ ID Akses Tidak Valid atau Belum Terdaftar!' });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ error: '❌ Pilih file terlebih dahulu!' });
+  }
+
+  const isOwner = accessId === ADMIN_CUSTOM_ID;
+  const roleText = isOwner ? '👑 Owner' : 'Member';
+  const fileUrl = `/uploads/${req.file.filename}`;
+
+  res.json({
+    message: `✅ File berhasil di-upload tanpa kompresi sebagai <b>${roleText}</b>!`,
+    fileUrl: fileUrl,
+    fileType: req.file.mimetype
+  });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
+});
