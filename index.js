@@ -17,10 +17,14 @@ app.listen(PORT, () => {
 const token = '9172990010:AAG1fgI_sras7A-R2fILadmX_OKI9kxENRk';
 const bot = new TelegramBot(token, { polling: true });
 
-// Masukkan username grup Telegram kamu di sini (contoh: '@qioraaa_community')
+// Username grup Telegram yang diwajibkan
 const REQUIRED_GROUP = '@qioraaa_community';
 
-// Fungsi generate ID Akses Unik
+// ID Telegram kamu & Custom ID khusus untuk Owner
+const ADMIN_TELEGRAM_ID = 7101495433;
+const ADMIN_CUSTOM_ID = 'QIORAAA-OWNER'; // Ganti tulisan ini jika mau teks lain
+
+// Fungsi generate ID Akses Unik untuk member
 function generateAccessID() {
   return 'QIORAAA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
@@ -34,10 +38,20 @@ bot.onText(/\/start/, async (msg) => {
     const validStatuses = ['creator', 'administrator', 'member'];
 
     if (validStatuses.includes(member.status)) {
-      const accessId = generateAccessID();
+      let accessId;
+      let badge = '';
+
+      // Cek apakah yang nge-chat adalah Kamu (Owner)
+      if (userId === ADMIN_TELEGRAM_ID) {
+        accessId = ADMIN_CUSTOM_ID;
+        badge = ' 👑 *(Owner Access)*';
+      } else {
+        accessId = generateAccessID();
+      }
+
       bot.sendMessage(
         chatId,
-        `✅ **Akses Diterima!**\n\nTerima kasih sudah bergabung di grup.\n🔑 **ID Akses Anda:** \`${accessId}\``,
+        `✅ **Akses Diterima!**${badge}\n\nTerima kasih sudah bergabung di grup.\n🔑 **ID Akses Anda:** \`${accessId}\` \n\nGunakan ID ini untuk akses Website Upload!`,
         { parse_mode: 'Markdown' }
       );
     } else {
